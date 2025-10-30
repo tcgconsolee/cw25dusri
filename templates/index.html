@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fight ****</title>
+    <style>
+        body {
+            overflow: hidden;
+        }
+        img {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 100vw;
+        }
+        video {
+            pointer-events:none;
+            position: absolute;
+            left: 0;
+            width: 100vw;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+    </style>
+</head>
+<body>
+    <img src="../static/imgs/fightclub.png" alt="" usemap="#image-map" id ="fightimg">
+
+    <map name="image-map">
+        <area target="" alt="book" title="book" href="" coords="75,689,290,656,542,736,446,879,153,860" shape="poly" onclick="play('1')">
+        <area target="" alt="watch" title="watch" href="" coords="851,495,768,656,873,896,1112,990,1307,873,1232,619,983,456" shape="poly"  onclick="play('4')">
+        <area target="" alt="venue" title="venue" href="" coords="1551,638,1335,733,1554,972,1900,906,1835,706,1754,630" shape="poly" onclick="play('3')">
+        <area target="" alt="mayhem" title="mayhem" href="" coords="571,836,474,949,625,994,810,985,768,863" shape="poly" onclick="play('2')">
+    </map>
+    <video src="../static/imgs/scene1.mp4" id ="1" muted></video>
+    <video src="../static/imgs/scene2.mp4" id ="2" muted></video>
+    <video src="../static/imgs/scene3.mp4" id ="3" muted></video>
+    <video src="../static/imgs/scene4.mp4" id ="4" muted></video>
+    <script>
+        function play(n) {
+            document.querySelectorAll("video").forEach(a => a.style.display="none");
+            document.getElementById(n).style.display="block";
+            document.getElementById(n).play();
+        }
+        document.querySelectorAll("area").forEach(a=>a.addEventListener("click", (e) => {e.preventDefault()}))
+                function resizeMap() {
+                const img = document.getElementById("fightimg");
+                if (!img.naturalWidth) return;
+                const wRatio = img.clientWidth / img.naturalWidth;
+                const hRatio = img.clientHeight / img.naturalHeight;
+                document.querySelectorAll("area").forEach(a => {
+                    const orig = a.dataset.origCoords.split(',').map(Number);
+                    const scaled = orig.map((c, i) => i % 2 === 0 ? c * wRatio : c * hRatio);
+                    a.coords = scaled.join(',');
+                });
+                }
+
+                window.addEventListener("load", () => {
+                document.querySelectorAll("area").forEach(a => a.dataset.origCoords = a.coords);
+                resizeMap();
+                });
+                window.addEventListener("resize", resizeMap);
+            </script>
+    <script src="https://cdn.jsdelivr.net/npm/image-map-resizer@1.0.10/js/imageMapResizer.min.js"></script>
+</body>
+</html>

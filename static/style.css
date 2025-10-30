@@ -1,0 +1,234 @@
+@font-face {
+    font-family: 'f';
+    src: url(./fonts/FIGHTT3_.ttf);
+}
+@font-face {
+    font-family: 's';
+    src: url(./fonts/Satoshi-Variable.ttf);
+}
+body {
+    background: #000;
+}
+.img-section {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    width: 60vw;
+}
+.img-section .tyler {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    height: 90%;
+}
+.line {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100vh;
+
+}
+.right-section {
+    position: absolute;
+    right: 0;
+    width: 40vw;
+    height: 100vh;
+
+}
+.login-container, .flicker1 {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 10vh;
+}
+.flicker1 {
+    top: 11.25vh;
+}
+#login {
+    height: 12vh;
+}
+.flicker1 img {
+    height: 9.75vh;
+}
+#uname, #psw {
+    position: absolute;left:50%;
+    bottom:0;
+    transform: translate(-50%);
+    background: none;
+    border: none;
+    outline: none;
+    height: 70%;
+    width: 100%;
+    border-radius: 20px;
+    padding-left: 2vw;
+}
+input {
+    border: none;
+    outline: none;
+    background: none;
+    color: #fff;
+    font-family: 's';
+}
+input:focus {
+    outline: none;
+    border: none;
+}
+.uname-container {
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%);
+    top: 35vh;
+
+}
+.psw-container {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 50vh;
+}
+#username {
+    height: 10vh;
+}
+#password {
+    height: 10vh;
+}
+.submit-container {
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%);
+    top: 70vh;
+}
+#submit {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    border-radius: 20px;
+}
+#submitb {
+    height: 7.5vh;
+}
+.group {
+    position: absolute;
+    left:0;
+    top:50%;
+    transform: translateY(-50%);
+    width: 50vw;
+    height: 100vh;
+    object-fit:cover;
+}
+.tylerdurden {
+    position: absolute;
+    opacity: 0.035;
+    width: 100vw;
+    height: 100vw;
+    font-family: 's';
+    font-weight: 800;
+    font-size: 6vw;
+    color: #fff;
+    z-index: -1;
+    word-break: break-all;
+}
+#venues {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 100vw;
+    object-fit: fill;
+    z-index: -1;
+}
+.img-container {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+.bases {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    transform: translate(50%, 50%);
+    height: 6vh;
+}
+#pic {
+    height: 50vh;
+    
+}
+.zero1 {
+    position: absolute;
+    top: 34.25vh;
+    font-size: 12vw;
+    color: #fff;
+    opacity: 0.1;
+    left: 0;
+    font-family:'s';
+    transform: translate(-25%);
+}
+.zero1 p {
+    margin: 0;
+}
+.lous {
+    position: absolute;
+    left: 10vw;
+    top: 30vh;
+    font-size: 5vw;
+    color: #fff;
+    opacity: 0.6;
+    font-family:'s';
+    line-height: 90px;  
+}
+.stress {
+    position: absolute;
+    left: 12.5vw;
+    top: 5vh;
+    font-size: 0.75vw;
+    color: #fff;
+    font-family:'s';
+    width: 12.5vw;
+    opacity: 0.5;
+}
+.lous span {
+    font-size: 1.5vw;
+    padding-left: 0.5vw;
+}
+.arrows {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translate(25%, -50%);
+    display: grid;
+    grid-template-columns: 5vw 5vw;
+    width:min-content;
+    column-gap: 2px;
+}
+.arrows img {
+    height: 18vh;
+    cursor: pointer;
+}
+#fights {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100vw;
+}
+.details {
+    position: absolute;
+    font-family:'s';
+    left: 15.25vw;
+    top: 70vh;
+    color: #fff;
+    opacity: 0.5;
+}
+.picstures {
+    position: absolute;
+    right: 10vw;
+    top: 50%;
+    transform: translateY(-50%);
+}
+.picstures img {
+    height: 70vh;
+}

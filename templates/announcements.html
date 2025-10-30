@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Announcements</title>
+  <style>@font-face {
+    font-family: 'f';
+    src: url(../static/fonts/FIGHTT3_.ttf);
+}
+@font-face {
+    font-family: 's';
+    src: url(../static/fonts/Satoshi-Variable.ttf);
+}
+
+
+    body {
+      margin: 0;
+      font-family: 's';
+      color: #dcdcdc;
+      background: transparent;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .bg {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 100vw;
+      z-index: 0;
+    }
+
+    .announcements {
+      position: relative;
+      width: 90%;
+      max-width: 1200px;
+      z-index: 2;
+    }
+
+    h1 {
+      text-align: center;
+      font-weight: 700;
+      color: #bfbfbf;
+      margin-bottom: 3rem;
+      font-size: 2.3rem;
+      letter-spacing: 1px;
+    }
+
+    .carousel {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      gap: 1.5rem;
+    }
+
+    /* Arrows */
+    .nav {
+      background: none;
+      border: none;
+      color: #999;
+      font-size: 1.6rem;
+      cursor: pointer;
+      transition: color 0.2s;
+      z-index: 3;
+      height: 100%;
+      display: flex;
+      align-items: center;
+    }
+    .nav:hover { color: #fff; }
+
+    /* Cards layout */
+    .cards {
+      display: grid;
+      grid-template-columns: 3fr 1fr 1fr 1fr;
+      gap: 1.5rem;
+      align-items: stretch;
+      width: 100%;
+    }
+
+    .card {
+      background: #000;
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      padding: 2rem;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .card h2 {
+      font-weight: 400;
+      color: #dcdcdc;
+      font-size: 1.2rem;
+    }
+
+    .card.active {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      text-align: left;
+    }
+
+    .card.active h2 {
+      font-weight: 600;
+      font-size: 1.3rem;
+      color: #fff;
+      margin-bottom: 1rem;
+    }
+
+    .card.active p {
+      font-size: 0.9rem;
+      color: #aaa;
+      line-height: 1.5;
+      font-weight: 300;
+    }
+
+    /* Footer section */
+    .footer-text {
+      position: absolute;
+      bottom: 0rem;
+      left: 50%;
+      transform: translate(-50%);
+      font-size: 0.8rem;
+      color: #777;
+      max-width: 360px;
+      line-height: 1.4;
+    }
+
+    .page-nav {
+      margin-top: 1.2rem;
+      display: flex;
+      gap: 2rem;
+      font-size: 0.8rem;
+      color: #999;
+      text-transform: lowercase;
+      letter-spacing: 0.5px;
+    }
+  </style>
+</head>
+<body>
+  <img src="../static/imgs/bg.svg" alt="" class="bg">
+
+  <section class="announcements">
+    <h1>Announcements</h1>
+
+    <div class="carousel">
+      <button class="nav left">←</button>
+
+      <div class="cards">
+        <div class="card active">
+          <h2>~ Tyler Durden</h2>
+          <p>
+            Warning: If you are reading this then this warning is for you. Every word you read of this useless fine print is another second off your life. Don’t you have other things to do? Is your life so empty that you honestly can’t think of a better way to spend these moments? Or are you so impressed with authority that you give respect and credence to all that claim it?
+          </p>
+        </div>
+
+        <div class="card"><h2>~ Mayhem</h2></div>
+        <div class="card"><h2>~ Warning</h2></div>
+        <div class="card"><h2>~ Rules</h2></div>
+      </div>
+
+      <button class="nav right">→</button>
+    </div>
+
+    
+  </section>
+  <div class="footer-text">
+      <p>
+        Check out the announcements below to see what's new, what's coming soon, and maybe even a few things we're not supposed to talk about yet.
+      </p>
+      <div class="page-nav">
+        <span>next →</span>
+        <span>← back</span>
+      </div>
+    </div>
+</body>
+</html>
