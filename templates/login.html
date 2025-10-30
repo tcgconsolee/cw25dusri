@@ -7,11 +7,18 @@
         <link rel="stylesheet" href="../static/style.css">
     </head>
     <body style="overflow:hidden">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
         <div class="img-section">
             <img src="../static/imgs/tyler.png" alt="" class="tyler">
             <img src="../static/imgs/line.svg" alt="" class="line">
         </div>
-        <form class="right-section">
+        <form class="right-section" method="POST">
             <div class="login-container">
                 <img src="../static/imgs/login.svg" alt="" id="login">
             </div>
