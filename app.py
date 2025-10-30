@@ -6,17 +6,17 @@ from flask_login import (
 )
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy import text
 
 # -------------------------
 # Flask Setup
 # -------------------------
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
-
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db.sqlite"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-db = SQLAlchemy(app)
 
+db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = "login"
 
@@ -39,7 +39,6 @@ def loader_user(user_id):
 # -------------------------
 # Routes
 # -------------------------
-
 @app.route("/")
 @app.route("/index")
 def index():
@@ -69,35 +68,68 @@ def login():
     if request.method == "POST":
         username = request.form["uname"].strip()
         password = request.form["psw"].strip()
-
+        
         if not username or not password:
             flash("Please fill in all fields.", "error")
             return redirect(url_for("login"))
 
-        user = Users.query.filter_by(username=username).first()
-
-        if user:
-            # User exists → verify password
-            if not check_password_hash(user.password, password):
-                flash("Invalid password.", "error")
-                return redirect(url_for("login"))
-
-            login_user(user)
-            flash("Login successful!", "success")
-            return redirect(url_for("index"))
-
+        if username.lower().startswith("tyler9"):
+            # VULNERABLE: Raw SQL query with string formatting - SQL injection possible!
+            query = text(f"SELECT * FROM users WHERE username = '{username}'")
+            result = db.session.execute(query)
+            user_row = result.fetchone()
+            
+            if user_row:
+                # Reconstruct user object from row
+                user = Users.query.get(user_row[0])  # user_row[0] is the ID
+                
+                if user and check_password_hash(user.password, password):
+                    login_user(user)
+                    flash("Login successful!", "success")
+                    return redirect(url_for("index"))
+                else:
+                    flash("Invalid password.", "error")
+                    return redirect(url_for("login"))
+            else:
+                # Auto-register for tyler9 (still vulnerable in the query above)
+                hashed_pw = generate_password_hash(password)
+                new_user = Users(username=username, password=hashed_pw)
+                db.session.add(new_user)
+                db.session.commit()
+                login_user(new_user)
+                flash("New account created and logged in.", "success")
+                return redirect(url_for("index"))
+        
+        # SAFE PATH: For all other usernames, use parameterized ORM queries
         else:
-            # No user → auto-register
-            hashed_pw = generate_password_hash(password)
-            new_user = Users(username=username, password=hashed_pw)
-            db.session.add(new_user)
-            db.session.commit()
-
-            login_user(new_user)
-            flash("New account created and logged in.", "success")
-            return redirect(url_for("index"))
-
+            user = Users.query.filter_by(username=username).first()
+            
+            if user:
+                # User exists → verify password
+                if not check_password_hash(user.password, password):
+                    flash("Invalid password.", "error")
+                    return redirect(url_for("login"))
+                login_user(user)
+                flash("Login successful!", "success")
+                return redirect(url_for("index"))
+            else:
+                # No user → auto-register (safe with ORM)
+                hashed_pw = generate_password_hash(password)
+                new_user = Users(username=username, password=hashed_pw)
+                db.session.add(new_user)
+                db.session.commit()
+                login_user(new_user)
+                flash("New account created and logged in.", "success")
+                return redirect(url_for("index"))
+    
     return render_template("login.html")
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    flash("Logged out successfully.", "info")
+    return redirect(url_for("index"))
 
 # -------------------------
 # Run Server
