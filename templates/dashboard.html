@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dashboard</title>
+
+  <!-- Tailwind CDN (for the original classes) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    .club {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        top: 2.5%;
+        font-size: 1.5vw;
+        color: #fff;
+        z-index: 100;
+    }
+    /* Copied & adapted keyframes and helper classes from your React component */
+    @keyframes scanline { 0% { background-position: 0 0; } 100% { background-position: 0 100%; } }
+    @keyframes gridMove { 0% { transform: translate(0, 0); } 100% { transform: translate(40px, 40px); } }
+    @keyframes lineMove { 0% { background-position: 0 0; } 100% { background-position: 100px 100px; } }
+    @keyframes blink { 0%,49% { opacity: 1; } 50%,100% { opacity: 0.3; } }
+    @keyframes glitch { 0% { transform: translate(0); } 20% { transform: translate(-2px, 2px); } 40% { transform: translate(-2px, -2px); } 60% { transform: translate(2px, 2px); } 80% { transform: translate(2px, -2px); } 100% { transform: translate(0); } }
+    @keyframes beamScan { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+    @keyframes beamScanVertical { 0% { background-position: 0 -200%; } 100% { background-position: 0 200%; } }
+    @keyframes pulse-ring { 0% { transform: scale(0.5); opacity: 0; } 50% { opacity: 0.3; } 100% { transform: scale(2); opacity: 0; } }
+    @keyframes dataStream { 0% { transform: translateY(-100%); } 100% { transform: translateY(100vh); } }
+    @keyframes radarSweep { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes matrixFall { 0% { background-position: 0 0; } 100% { background-position: 0 200px; } }
+
+    .blink { animation: blink 1s infinite; }
+    .glow-text { text-shadow: 0 0 10px rgba(255,255,255,0.5), 0 0 20px rgba(255,255,255,0.3); }
+    .glow-box { box-shadow: 0 0 15px rgba(255,255,255,0.1), inset 0 0 15px rgba(255,255,255,0.05); }
+    .glow-border { border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 0 10px rgba(255,255,255,0.1); }
+    .glow-border:hover { border: 1px solid rgba(255,255,255,0.4); box-shadow: 0 0 20px rgba(255,255,255,0.2); }
+    .glitch-text:hover { animation: glitch 0.3s infinite; }
+
+    /* Particle container will be positioned absolute; small particle style */
+    #particles .particle { position: absolute; border-radius: 9999px; opacity: .3; pointer-events: none; }
+
+    /* Mouse glow elements to be controlled by JS */
+    .mouse-glow { position: fixed; pointer-events: none; border-radius: 9999px; transform: translate3d(0,0,0); z-index: 0; }
+
+    /* Make sure backdrop-blur class works for non-Tailwind setups with fallback */
+    .backdrop-blur-sm { backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+
+    /* minor layout niceties */
+    body { background: #000; color: #fff; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Courier New", monospace; }
+  </style>
+</head>
+<body class="min-h-screen bg-black text-white font-mono p-4 overflow-hidden relative">
+
+  <!-- Mouse-following glows -->
+  <div id="mouseGlow1" class="mouse-glow w-96 h-96 blur-3xl opacity-20" style="background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 70%);"></div>
+  <div id="mouseGlow2" class="mouse-glow w-64 h-64 blur-2xl opacity-10" style="background: radial-gradient(circle, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 70%);"></div>
+
+  <!-- Animated background effects (container for many effects) -->
+  <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+    <div class="absolute inset-0 opacity-10"
+         style="background-image: linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 40px 40px; animation: gridMove 20s linear infinite;"></div>
+
+    <div class="absolute inset-0 opacity-5"
+         style="background-image: linear-gradient(rgba(255,255,255,0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.2) 1px, transparent 1px); background-size: 100px 100px; animation: gridMove 30s linear infinite reverse;"></div>
+
+    <div id="particles" class="absolute inset-0"></div>
+
+    <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-white rounded-full blur-3xl opacity-5 animate-pulse"></div>
+    <div class="absolute bottom-1/4 right-1/3 w-80 h-80 bg-white rounded-full blur-3xl opacity-5 animate-pulse" style="animation-delay:1s"></div>
+    <div class="absolute top-1/2 left-1/2 w-72 h-72 bg-white rounded-full blur-3xl opacity-5 animate-pulse" style="animation-delay:2s"></div>
+
+    <div class="absolute inset-0 opacity-5" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 100px, rgba(255,255,255,0.1) 100px, rgba(255,255,255,0.1) 101px); animation: lineMove 15s linear infinite;"></div>
+
+    <div class="absolute inset-0 opacity-5" style="background-image: repeating-linear-gradient(-45deg, transparent, transparent 80px, rgba(255,255,255,0.08) 80px, rgba(255,255,255,0.08) 81px); animation: lineMove 20s linear infinite reverse;"></div>
+
+    <div class="absolute inset-0 opacity-10" style="background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%); background-size: 200% 100%; animation: beamScan 4s ease-in-out infinite;"></div>
+
+    <div class="absolute inset-0 opacity-10" style="background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%); background-size: 100% 200%; animation: beamScanVertical 6s ease-in-out infinite;"></div>
+
+    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full h-full">
+      <div class="absolute inset-0 rounded-full border border-white opacity-10" style="animation: pulse-ring 3s ease-out infinite"></div>
+      <div class="absolute inset-0 rounded-full border border-white opacity-10" style="animation: pulse-ring 3s ease-out infinite 1s"></div>
+      <div class="absolute inset-0 rounded-full border border-white opacity-10" style="animation: pulse-ring 3s ease-out infinite 2s"></div>
+    </div>
+
+    <div class="absolute inset-0 opacity-5" style="background-image: url(\"data:image/svg+xml,%3Csvg width='50' height='50' viewBox='0 0 50 50' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M25 5 L40 15 L40 35 L25 45 L10 35 L10 15 Z' fill='none' stroke='rgba(255,255,255,0.3)' stroke-width='0.5'/%3E%3C/svg%3E\"); background-size: 50px 50px; animation: gridMove 25s linear infinite;"></div>
+
+    <div class="absolute top-0 left-1/4 w-0.5 h-full bg-gradient-to-b from-transparent via-white to-transparent opacity-20" style="animation: dataStream 2s linear infinite"></div>
+    <div class="absolute top-0 left-2/4 w-0.5 h-full bg-gradient-to-b from-transparent via-white to-transparent opacity-20" style="animation: dataStream 3s linear infinite; animation-delay:0.5s"></div>
+    <div class="absolute top-0 left-3/4 w-0.5 h-full bg-gradient-to-b from-transparent via-white to-transparent opacity-20" style="animation: dataStream 2.5s linear infinite; animation-delay:1s"></div>
+
+    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96">
+      <div class="absolute inset-0" style="background: conic-gradient(from 0deg, transparent 0deg, rgba(255,255,255,0.1) 60deg, transparent 120deg); animation: radarSweep 4s linear infinite; border-radius: 50%"></div>
+    </div>
+
+    <div class="absolute inset-0 opacity-5" style="background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, white 3px); animation: scanline 8s linear infinite;"></div>
+
+    <div class="absolute inset-0 opacity-5" style="background-image: url(\"data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='5' y='15' fill='rgba(255,255,255,0.8)' font-family='monospace' font-size='12'%3E1%3C/text%3E%3C/svg%3E\"); background-size: 20px 20px; animation: matrixFall 10s linear infinite;"></div>
+
+    <div class="absolute inset-0 bg-gradient-radial from-transparent via-transparent to-black opacity-40"></div>
+
+    <div class="absolute top-0 left-0 w-32 h-32 border-t-2 border-l-2 border-white opacity-20"></div>
+    <div class="absolute top-0 right-0 w-32 h-32 border-t-2 border-r-2 border-white opacity-20"></div>
+    <div class="absolute bottom-0 left-0 w-32 h-32 border-b-2 border-l-2 border-white opacity-20"></div>
+    <div class="absolute bottom-0 right-0 w-32 h-32 border-b-2 border-r-2 border-white opacity-20"></div>
+  </div>
+
+  <!-- App content -->
+  <div class="max-w-full mx-auto relative z-10" id="appRoot">
+    <!-- Header -->
+    <div id="header" class="glow-border p-3 mb-3 glow-box backdrop-blur-sm bg-black/50">
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center gap-4">
+          <span class="text-xl glow-text glitch-text">┌─[<span class="text-white">PROJECT_MAYHEM</span>]</span>
+          <span class="text-sm opacity-70">TTY: /dev/pts/0</span>
+        </div>
+        <div class="text-sm opacity-70" id="headerTime">2025-10-31 00:00:00</div>
+      </div>
+      <div class="text-xs opacity-60">└──╼ RULE #1: You do not ask questions. RULE #2: Targets will be destroyed.</div>
+    </div>
+
+    <!-- System Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3" id="systemStats">
+      <div class="glow-border p-3 glow-box backdrop-blur-sm bg-black/50">
+        <div class="text-xs mb-1 opacity-60">[ SPACE_MONKEYS ]</div>
+        <div class="text-2xl mb-1 glow-text" id="memberCount">1247</div>
+        <div class="text-xs">STATUS: <span class="text-white blink glow-text">●</span> OPERATIONAL</div>
+        <div class="text-xs mt-1 opacity-70">His name is Robert Paulson</div>
+      </div>
+
+      <div class="glow-border p-3 glow-box backdrop-blur-sm bg-black/50">
+        <div class="text-xs mb-1 opacity-60">[ CPU_USAGE ]</div>
+        <div class="text-2xl mb-1 glow-text" id="cpuUsageText">42%</div>
+        <div class="text-xs opacity-70" id="cpuBar">[████░░░░░░]</div>
+        <div class="text-xs mt-1 opacity-70">THREADS: 8 CORES</div>
+      </div>
+
+      <div class="glow-border p-3 glow-box backdrop-blur-sm bg-black/50">
+        <div class="text-xs mb-1 opacity-60">[ MEM_USAGE ]</div>
+        <div class="text-2xl mb-1 glow-text" id="memUsageText">68%</div>
+        <div class="text-xs opacity-70" id="memBar">[███████░░░]</div>
+        <div class="text-xs mt-1 opacity-70">RAM: 16GB DDR4</div>
+      </div>
+
+      <div class="glow-border p-3 glow-box backdrop-blur-sm bg-black/50">
+        <div class="text-xs mb-1 opacity-60">[ NET_TRAFFIC ]</div>
+        <div class="text-2xl mb-1 glow-text" id="netTrafficText">156 KB/s</div>
+        <div class="text-xs opacity-70" id="netMore">TX: 89KB/s RX: 156KB/s</div>
+        <div class="text-xs mt-1 opacity-70">PROTO: TCP/IP</div>
+      </div>
+    </div>
+
+    <!-- Input Terminal -->
+    <div class="glow-border p-4 mb-3 glow-box backdrop-blur-sm bg-black/50">
+      <div class="text-xs mb-3 opacity-60 flex items-center justify-between">
+        <span>[ INITIATE_ATTACK ]</span>
+        <span class="text-xs opacity-40">"It's only after we've lost everything that we're free to do anything"</span>
+      </div>
+
+      <div class="flex gap-3 items-center">
+        <span class="opacity-70 text-sm">mayhem@terminal:~#</span>
+        <div class="flex-1 glow-border bg-black/70 rounded p-2">
+          <input id="domainInput" type="text" placeholder="target.com"
+                 class="w-full bg-transparent border-none text-white outline-none placeholder-gray-500 text-sm" />
+        </div>
+        <button id="destroyBtn" class="text-white border border-white/30 px-4 py-2 hover:bg-white hover:text-black transition-all duration-300 glow-border font-semibold text-sm">[DESTROY]</button>
+      </div>
+
+      <div class="text-xs opacity-40 mt-2" id="cmdPreview">→ ./ddos --target &lt;domain&gt; --mode AGGRESSIVE --packets UNLIMITED</div>
+    </div>
+
+    <!-- Main grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3" id="mainGrid">
+      <!-- Active DDoS attack area (injected by JS) -->
+      <div id="activeDdosContainer"></div>
+
+      <!-- Active Targets -->
+      <div class="glow-border p-3 glow-box backdrop-blur-sm bg-black/50">
+        <div class="text-xs mb-3 opacity-60 flex items-center justify-between">
+          <span>[ ACTIVE_ATTACKS ]</span>
+          <span id="activeSummary">COMPROMISED: 0 | FLOODING: 0</span>
+        </div>
+        <div class="space-y-2" id="targetsList"></div>
+      </div>
+
+      <!-- Suggested Targets -->
+      <div class="glow-border p-3 glow-box backdrop-blur-sm bg-black/50">
+        <div class="text-xs mb-3 opacity-60">[ PRIORITY_OBJECTIVES ]</div>
+        <div class="space-y-3">
+          <div class="border-l-2 border-red-500/50 pl-2 text-xs glow-box p-2 backdrop-blur-sm bg-black/30">
+            <div class="glow-text mb-1 text-red-400">&gt;&gt; discover.com</div>
+            <div class="opacity-50 mb-1">OBJECTIVE: Major financial institution - Bring down the system</div>
+            <div class="opacity-50">THREAT LEVEL: EXTREME | ATTACK: RECOMMENDED</div>
+          </div>
+
+          <div class="border-l-2 border-red-500/50 pl-2 text-xs glow-box p-2 backdrop-blur-sm bg-black/30">
+            <div class="glow-text mb-1 text-red-400">&gt;&gt; bankofamerica.com</div>
+            <div class="opacity-50 mb-1">OBJECTIVE: "You are not your bank account" - Target acquired</div>
+            <div class="opacity-50">THREAT LEVEL: CRITICAL | ATTACK: AUTHORIZED</div>
+          </div>
+
+          <div class="border-l-2 border-yellow-500/50 pl-2 text-xs glow-box p-2 backdrop-blur-sm bg-black/30">
+            <div class="glow-text mb-1 text-yellow-400">&gt;&gt; synchrony.com</div>
+            <div class="opacity-50 mb-1">OBJECTIVE: Growing retail sector - Secondary target</div>
+            <div class="opacity-50">THREAT LEVEL: HIGH | ATTACK: PENDING</div>
+          </div>
+
+          <div class="border-l-2 border-red-500/50 pl-2 text-xs glow-box p-2 backdrop-blur-sm bg-black/30">
+            <div class="glow-text mb-1 text-red-400">&gt;&gt; paypal.com</div>
+            <div class="opacity-50 mb-1">OBJECTIVE: "Things you own end up owning you" - Eliminate payment systems</div>
+            <div class="opacity-50">THREAT LEVEL: EXTREME | ATTACK: PRIORITY</div>
+          </div>
+        </div>
+
+        <div class="mt-3 pt-3 border-t border-white/20 text-xs opacity-50">[SPACE] to initiate | [ESC] to abort | Tyler says: "Self-improvement is masturbation"</div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="glow-border p-2 mt-3 text-xs opacity-50 flex items-center justify-between glow-box backdrop-blur-sm bg-black/50">
+      <div>"The things you own end up owning you" - Tyler Durden | UPTIME: 7d 12h 34m</div>
+      <div class="flex gap-4">
+        <span id="attacksCount">ATTACKS: 0</span>
+        <span>PROCS: 247</span>
+        <span id="monkeysCount">MONKEYS: 1247</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ---- App state (vanilla) ----
+    const state = {
+      domain: '',
+      activeDDoS: null,
+      ddosStats: { bandwidth: 0, packets: 0, requests: 0, uptime: 100, responseTime: 0 },
+      targets: [
+        { name: 'chase.com', ip: '159.53.224.12', status: 'ACTIVE', latency: '23ms', packets: '2847', attack: 'DDOS FLOOD' },
+        { name: 'americanexpress.com', ip: '104.16.85.20', status: 'ACTIVE', latency: '18ms', packets: '3192', attack: 'SYN FLOOD' },
+        { name: 'citibank.com', ip: '192.168.1.45', status: 'MONITOR', latency: '45ms', packets: '1203', attack: 'UDP FLOOD' },
+        { name: 'capitalone.com', ip: '172.217.14.206', status: 'ACTIVE', latency: '31ms', packets: '2456', attack: 'HTTP FLOOD' },
+        { name: 'wellsfargo.com', ip: '208.67.222.222', status: 'MONITOR', latency: '52ms', packets: '891', attack: 'ICMP FLOOD' },
+      ],
+      memberCount: 1247,
+      time: new Date(),
+      cpuUsage: 42,
+      memUsage: 68,
+      netTraffic: 156,
+      mousePos: { x: 0, y: 0 },
+      particles: []
+    };
+
+    // ---- DOM refs ----
+    const headerTimeEl = document.getElementById('headerTime');
+    const cpuUsageText = document.getElementById('cpuUsageText');
+    const cpuBar = document.getElementById('cpuBar');
+    const memUsageText = document.getElementById('memUsageText');
+    const memBar = document.getElementById('memBar');
+    const netTrafficText = document.getElementById('netTrafficText');
+    const netMore = document.getElementById('netMore');
+    const memberCountEl = document.getElementById('memberCount');
+    const domainInput = document.getElementById('domainInput');
+    const destroyBtn = document.getElementById('destroyBtn');
+    const cmdPreview = document.getElementById('cmdPreview');
+    const targetsList = document.getElementById('targetsList');
+    const activeSummary = document.getElementById('activeSummary');
+    const activeDdosContainer = document.getElementById('activeDdosContainer');
+    const attacksCount = document.getElementById('attacksCount');
+    const monkeysCount = document.getElementById('monkeysCount');
+    const particlesContainer = document.getElementById('particles');
+    const mouseGlow1 = document.getElementById('mouseGlow1');
+    const mouseGlow2 = document.getElementById('mouseGlow2');
+
+    // Utility: format date/time
+    function formatTime(date) { return date.toTimeString().split(' ')[0]; }
+    function formatDate(date) { return date.toISOString().split('T')[0]; }
+
+    // Build progress bar string like React version
+    function buildBar(percent) {
+      const filled = Math.floor(percent / 10);
+      const empty = 10 - filled;
+      return '[' + '█'.repeat(filled) + '░'.repeat(empty) + ']';
+    }
+
+    // Render targets list
+    function renderTargets() {
+      targetsList.innerHTML = '';
+      state.targets.forEach((t, idx) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'border-l-2 border-white/30 pl-2 text-xs glow-box p-2 backdrop-blur-sm bg-black/30';
+        wrapper.innerHTML = `
+          <div class="flex items-center justify-between mb-1">
+            <span class="opacity-60">${String(idx + 1).padStart(2, '0')}.</span>
+            <span class="flex-1 ml-2 glow-text">${t.name}</span>
+            <span class="${t.status === 'ACTIVE' ? 'text-red-400 blink glow-text' : 'text-yellow-400'}">[${t.status === 'ACTIVE' ? 'ATTACKING' : 'STANDBY'}]</span>
+          </div>
+          <div class="opacity-50 ml-5 mb-1">IP: ${t.ip} | RTT: ${t.latency} | PKT: ${t.packets}</div>
+          <div class="ml-5 text-red-400 opacity-70">ATTACK: ${t.attack} | BANDWIDTH: ${Math.floor(Math.random() * 500 + 100)} Mbps</div>
+        `;
+        targetsList.appendChild(wrapper);
+      });
+
+      activeSummary.textContent = `COMPROMISED: ${state.targets.length} | FLOODING: ${state.targets.filter(t => t.status === 'ACTIVE').length}`;
+      attacksCount.textContent = `ATTACKS: ${state.targets.filter(t => t.status === 'ACTIVE').length}`;
+      monkeysCount.textContent = `MONKEYS: ${state.memberCount}`;
+    }
+
+    // Render active DDoS block if any
+    function renderActiveDdos() {
+      activeDdosContainer.innerHTML = '';
+      if (!state.activeDDoS) return;
+      const el = document.createElement('div');
+      el.className = 'lg:col-span-2 glow-border p-4 glow-box backdrop-blur-sm bg-black/50 border-red-500/50';
+      el.innerHTML = `
+        <div class="text-xs mb-3 opacity-60 flex items-center justify-between">
+          <span class="text-red-400 glow-text">[ ACTIVE_DDOS_ATTACK ]</span>
+          <span class="text-red-400 blink">● FLOODING IN PROGRESS</span>
+        </div>
+
+        <div class="mb-4">
+          <div class="text-2xl glow-text mb-2">${state.activeDDoS}</div>
+          <div class="text-xs opacity-50">Target acquired. "You're not your job. You're not how much money you have in the bank."</div>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <div class="glow-border p-3 bg-black/50">
+            <div class="text-xs opacity-60 mb-1">BANDWIDTH</div>
+            <div class="text-xl glow-text text-red-400">${state.ddosStats.bandwidth} Mbps</div>
+            <div class="text-xs opacity-50 mt-1">${buildBar(Math.min(state.ddosStats.bandwidth / 10, 100))}</div>
+          </div>
+
+          <div class="glow-border p-3 bg-black/50">
+            <div class="text-xs opacity-60 mb-1">PACKETS SENT</div>
+            <div class="text-xl glow-text text-red-400">${state.ddosStats.packets.toLocaleString()}</div>
+            <div class="text-xs opacity-50 mt-1">+${Math.floor(Math.random() * 1000)}/sec</div>
+          </div>
+
+          <div class="glow-border p-3 bg-black/50">
+            <div class="text-xs opacity-60 mb-1">HTTP REQUESTS</div>
+            <div class="text-xl glow-text text-red-400">${state.ddosStats.requests.toLocaleString()}</div>
+            <div class="text-xs opacity-50 mt-1">+${Math.floor(Math.random() * 500)}/sec</div>
+          </div>
+
+          <div class="glow-border p-3 bg-black/50">
+            <div class="text-xs opacity-60 mb-1">TARGET UPTIME</div>
+            <div class="text-xl glow-text text-yellow-400">${state.ddosStats.uptime.toFixed(1)}%</div>
+            <div class="text-xs opacity-50 mt-1">${state.ddosStats.uptime < 20 ? 'CRITICAL' : state.ddosStats.uptime < 50 ? 'DEGRADED' : 'STABLE'}</div>
+          </div>
+
+          <div class="glow-border p-3 bg-black/50">
+            <div class="text-xs opacity-60 mb-1">RESPONSE TIME</div>
+            <div class="text-xl glow-text text-red-400">${state.ddosStats.responseTime}ms</div>
+            <div class="text-xs opacity-50 mt-1">${state.ddosStats.responseTime > 5000 ? 'TIMEOUT' : 'OVERLOADED'}</div>
+          </div>
+        </div>
+
+        <div class="mt-3 pt-3 border-t border-red-500/30">
+          <div class="text-xs opacity-60 mb-2">ATTACK VECTOR ANALYSIS:</div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs">
+            <div class="opacity-70">SYN FLOOD: <span class="text-red-400">ACTIVE</span></div>
+            <div class="opacity-70">HTTP FLOOD: <span class="text-red-400">ACTIVE</span></div>
+            <div class="opacity-70">UDP FLOOD: <span class="text-red-400">ACTIVE</span></div>
+            <div class="opacity-70">ICMP FLOOD: <span class="text-yellow-400">STANDBY</span></div>
+            <div class="opacity-70">DNS AMPLIFICATION: <span class="text-red-400">ACTIVE</span></div>
+            <div class="opacity-70">SLOWLORIS: <span class="text-red-400">ACTIVE</span></div>
+          </div>
+        </div>
+
+        <button id="abortBtn" class="mt-3 w-full text-white border border-red-500/50 px-4 py-2 hover:bg-red-500 hover:text-white transition-all duration-300 glow-border font-semibold text-sm">[ABORT_ATTACK]</button>
+      `;
+      activeDdosContainer.appendChild(el);
+
+      // bind abort btn
+      document.getElementById('abortBtn').addEventListener('click', () => {
+        state.activeDDoS = null;
+        state.ddosStats = { bandwidth: 0, packets: 0, requests: 0, uptime: 100, responseTime: 0 };
+        renderActiveDdos();
+        renderTargets();
+      });
+    }
+
+    // Add target logic (UI only)
+    function addTargetFromInput() {
+      const domain = domainInput.value.trim();
+      if (!domain) return;
+      const attackTypes = ['DDOS FLOOD','SYN FLOOD','UDP FLOOD','HTTP FLOOD','ICMP FLOOD','TCP FLOOD'];
+      const newTarget = {
+        name: domain,
+        ip: `${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`,
+        status: 'ACTIVE',
+        latency: `${Math.floor(Math.random()*100)}ms`,
+        packets: '0',
+        attack: attackTypes[Math.floor(Math.random()*attackTypes.length)]
+      };
+      state.targets.push(newTarget);
+      state.activeDDoS = domain;
+      state.ddosStats = { bandwidth: 0, packets: 0, requests: 0, uptime: 100, responseTime: Math.floor(Math.random() * 50 + 10) };
+      domainInput.value = '';
+      cmdPreview.textContent = `→ ./ddos --target ${domain} --mode AGGRESSIVE --packets UNLIMITED`;
+      renderTargets();
+      renderActiveDdos();
+    }
+
+    destroyBtn.addEventListener('click', addTargetFromInput);
+    domainInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') addTargetFromInput(); });
+
+    // keyboard shortcuts (space to initiate using current input, Esc to abort)
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') { e.preventDefault(); addTargetFromInput(); }
+      if (e.code === 'Escape') {
+        state.activeDDoS = null;
+        state.ddosStats = { bandwidth: 0, packets: 0, requests: 0, uptime: 100, responseTime: 0 };
+        renderActiveDdos();
+        renderTargets();
+      }
+    });
+
+    // Mouse move for glow
+    window.addEventListener('mousemove', (e) => {
+      state.mousePos = { x: e.clientX, y: e.clientY };
+      const left1 = e.clientX - 192;
+      const top1 = e.clientY - 192;
+      mouseGlow1.style.left = left1 + 'px';
+      mouseGlow1.style.top = top1 + 'px';
+      mouseGlow2.style.left = (e.clientX - 128) + 'px';
+      mouseGlow2.style.top = (e.clientY - 128) + 'px';
+    });
+
+    // Particle generation & animation
+    function initParticles() {
+      state.particles = Array.from({ length: 30 }, (_, i) => ({
+        id: i,
+        x: Math.random() * 100,
+        y: Math.random() * 100,
+        size: Math.random() * 3 + 1,
+        speedX: (Math.random() - 0.5) * 0.5,
+        speedY: (Math.random() - 0.5) * 0.5
+      }));
+
+      // create DOM nodes
+      particlesContainer.innerHTML = '';
+      state.particles.forEach(p => {
+        const d = document.createElement('div');
+        d.className = 'particle';
+        d.style.width = p.size + 'px';
+        d.style.height = p.size + 'px';
+        d.style.left = p.x + '%';
+        d.style.top = p.y + '%';
+        d.style.boxShadow = `0 0 ${p.size * 2}px rgba(255,255,255,0.5)`;
+        d.style.background = 'white';
+        d.dataset.id = p.id;
+        particlesContainer.appendChild(d);
+      });
+
+      setInterval(() => {
+        state.particles = state.particles.map(p => ({
+          ...p,
+          x: (p.x + p.speedX + 100) % 100,
+          y: (p.y + p.speedY + 100) % 100
+        }));
+        // update DOM
+        state.particles.forEach(p => {
+          const el = particlesContainer.querySelector('[data-id="'+p.id+'"]');
+          if (el) {
+            el.style.left = p.x + '%';
+            el.style.top = p.y + '%';
+          }
+        });
+      }, 50);
+    }
+
+    // Stats update interval (every second)
+    setInterval(() => {
+      state.time = new Date();
+      state.cpuUsage = Math.floor(Math.random() * 30) + 30;
+      state.memUsage = Math.floor(Math.random() * 20) + 60;
+      state.netTraffic = Math.floor(Math.random() * 100) + 100;
+
+      if (state.activeDDoS) {
+        state.ddosStats = {
+          bandwidth: Math.min(state.ddosStats.bandwidth + Math.floor(Math.random() * 50), 999),
+          packets: state.ddosStats.packets + Math.floor(Math.random() * 1000 + 500),
+          requests: state.ddosStats.requests + Math.floor(Math.random() * 500 + 200),
+          uptime: Math.max(state.ddosStats.uptime - Math.random() * 2, 0),
+          responseTime: Math.min(state.ddosStats.responseTime + Math.floor(Math.random() * 100), 9999)
+        };
+      }
+
+      // rerender relevant UI every second
+      headerTimeEl.textContent = `${formatDate(state.time)} ${formatTime(state.time)}`;
+      cpuUsageText.textContent = state.cpuUsage + '%';
+      cpuBar.textContent = buildBar(state.cpuUsage);
+      memUsageText.textContent = state.memUsage + '%';
+      memBar.textContent = buildBar(state.memUsage);
+      netTrafficText.textContent = state.netTraffic + ' KB/s';
+      netMore.textContent = `TX: 89KB/s RX: ${state.netTraffic}KB/s`;
+      memberCountEl.textContent = state.memberCount;
+      renderTargets();
+      renderActiveDdos();
+    }, 1000);
+
+    // Initial render
+    renderTargets();
+    renderActiveDdos();
+    initParticles();
+
+    // Set an initial command preview update on input
+    domainInput.addEventListener('input', () => {
+      const d = domainInput.value.trim();
+      cmdPreview.textContent = d ? `→ ./ddos --target ${d} --mode AGGRESSIVE --packets UNLIMITED` : '→ ./ddos --target <domain> --mode AGGRESSIVE --packets UNLIMITED';
+    });
+
+    // seed header time immediate
+    headerTimeEl.textContent = `${formatDate(state.time)} ${formatTime(state.time)}`;
+
+    // ---- End of app ----
+  </script>
+</body>
+</html>

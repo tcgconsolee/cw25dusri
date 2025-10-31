@@ -3,16 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fight ****</title>
+    <title>***** ****</title>
     <style>
+        @font-face {
+            font-family: 's';
+            src: url(../static/fonts/Satoshi-Variable.ttf);
+        }
         body {
             overflow: hidden;
         }
-        img {
+        .img-container {
             position: absolute;
             left: 0;
             top: 50%;
             transform: translateY(-50%);
+        }
+        img {
             width: 100vw;
         }
         video {
@@ -22,48 +28,211 @@
             width: 100vw;
             top: 50%;
             transform: translateY(-50%);
+            display:none;
         }
-        
+        .dot {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #ffffff60;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 10;
+            transition: all ease-in-out 500ms;
+            display: block;
+        }
+
+        .dot.active {
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            transition: all ease-in-out 500ms;
+        }
+
+        .dot::after {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            content: '';
+            width: 18px;
+            height: 18px;
+            border-radius: inherit;
+            border: #fff solid 1px;
+        }
+        [id^="glass"] {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity:0;
+            transition: opacity 1s ease-in-out;
+            display:none;
+            left:0;
+            backdrop-filter: blur(5px);
+        }
+        .board {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        top: 2.5%;
+        font-size: 1.25vw;
+        color: #fff;
+        z-index: 100;
+        font-family:'s';
+    }
+    a {
+        text-decoration: none;
+        font-family:'s';
+    }
+    a:visited {
+        text-decoration:none;
+        color: #fff;
+    }
     </style>
 </head>
 <body>
-    <img src="../static/imgs/fightclub.png" alt="" usemap="#image-map" id ="fightimg">
+    <div class="img-container">
+        <img src="../static/imgs/fightclub.png" alt="" usemap="#image-map" id="fightimg">
 
-    <map name="image-map">
-        <area target="" alt="book" title="book" href="" coords="75,689,290,656,542,736,446,879,153,860" shape="poly" onclick="play('1')">
-        <area target="" alt="watch" title="watch" href="" coords="851,495,768,656,873,896,1112,990,1307,873,1232,619,983,456" shape="poly"  onclick="play('4')">
-        <area target="" alt="venue" title="venue" href="" coords="1551,638,1335,733,1554,972,1900,906,1835,706,1754,630" shape="poly" onclick="play('3')">
-        <area target="" alt="mayhem" title="mayhem" href="" coords="571,836,474,949,625,994,810,985,768,863" shape="poly" onclick="play('2')">
-    </map>
-    <video src="../static/imgs/scene1.mp4" id ="1" muted></video>
-    <video src="../static/imgs/scene2.mp4" id ="2" muted></video>
-    <video src="../static/imgs/scene3.mp4" id ="3" muted></video>
-    <video src="../static/imgs/scene4.mp4" id ="4" muted></video>
+        <map name="image-map">
+            <area target="" alt="book" title="book" href="" coords="75,689,290,656,542,736,446,879,153,860" shape="poly" onclick="play('1')">
+            <area target="" alt="watch" title="watch" href="" coords="851,495,768,656,873,896,1112,990,1307,873,1232,619,983,456" shape="poly" onclick="play('4')">
+            <area target="" alt="venue" title="venue" href="" coords="1551,638,1335,733,1554,972,1900,906,1835,706,1754,630" shape="poly" onclick="play('3')">
+            <area target="" alt="mayhem" title="mayhem" href="" coords="571,836,474,949,625,994,810,985,768,863" shape="poly" onclick="play('2')">
+        </map>
+    </div>
+    
+    <video src="../static/imgs/scene1.mp4" id="1" muted></video>
+    <video src="../static/imgs/scene2.mp4" id="2" muted></video>
+    <video src="../static/imgs/scene3.mp4" id="3" muted></video>
+    <video src="../static/imgs/scene4.mp4" id="4" muted></video>
+
+    <img src="../static/imgs/glassbook.svg" alt="" id="glass1">
+    <img src="../static/imgs/glassmayhem.svg" alt="" id="glass2">
+    <img src="../static/imgs/glassvenues.svg" alt="" id="glass3">
+    <img src="../static/imgs/glassfight.svg" alt="" id="glass4">
+    
     <script>
         function play(n) {
             document.querySelectorAll("video").forEach(a => a.style.display="none");
             document.getElementById(n).style.display="block";
+            document.getElementById(`glass${n}`).style.display="block";
+            setTimeout(() => {
+                
+            document.getElementById(`glass${n}`).style.opacity = "1";
+            }, 2000);
             document.getElementById(n).play();
+            document.getElementById("fightimg").style.pointerEvents="none";
         }
+        document.querySelectorAll("[id^='glass']").forEach((s, i) => {
+            s.addEventListener("click", () => {
+                if(i==0) {
+                    window.location.href="/announcements"
+                } else if (i==1) {
+                    window.location.href="/mayhem"
+                } else if (i==2) {
+                    window.location.href="/venues"
+                } else {
+                    window.location.href="/fights"
+                }
+            });
+        })
         document.querySelectorAll("area").forEach(a=>a.addEventListener("click", (e) => {e.preventDefault()}))
-                function resizeMap() {
-                const img = document.getElementById("fightimg");
-                if (!img.naturalWidth) return;
-                const wRatio = img.clientWidth / img.naturalWidth;
-                const hRatio = img.clientHeight / img.naturalHeight;
-                document.querySelectorAll("area").forEach(a => {
-                    const orig = a.dataset.origCoords.split(',').map(Number);
-                    const scaled = orig.map((c, i) => i % 2 === 0 ? c * wRatio : c * hRatio);
-                    a.coords = scaled.join(',');
-                });
+        
+        function resizeMap() {
+            const img = document.getElementById("fightimg");
+            if (!img.naturalWidth) return;
+            const wRatio = img.clientWidth / img.naturalWidth;
+            const hRatio = img.clientHeight / img.naturalHeight;
+            document.querySelectorAll("area").forEach(a => {
+                const orig = a.dataset.origCoords.split(',').map(Number);
+                const scaled = orig.map((c, i) => i % 2 === 0 ? c * wRatio : c * hRatio);
+                a.coords = scaled.join(',');
+            });
+        }
+
+        let dotData = [];
+
+        function centroid(coords) {
+            let sx = 0, sy = 0, count = 0;
+            for (let i = 0; i < coords.length; i += 2) {
+                sx += coords[i];
+                sy += coords[i + 1];
+                count++;
+            }
+            return { x: sx / count, y: sy / count };
+        }
+
+        const img = document.getElementById("fightimg");
+        const imgContainer = document.querySelector(".img-container");
+
+        function buildDotDataFromMap(mapName = "image-map") {
+            const map = document.querySelector(`map[name="${mapName}"]`);
+            if (!map) return;
+            dotData = [];
+
+            map.querySelectorAll("area").forEach(area => {
+                // Use ORIGINAL coords stored in dataset
+                const origCoords = area.dataset.origCoords.split(",").map(Number);
+                const shape = (area.shape || "poly").toLowerCase();
+                let cx = 0, cy = 0;
+
+                if (shape === "poly" || shape === "rect") {
+                    const c = centroid(origCoords);
+                    cx = c.x; 
+                    cy = c.y;
+                } else if (shape === "circle") {
+                    cx = origCoords[0]; 
+                    cy = origCoords[1];
                 }
 
-                window.addEventListener("load", () => {
-                document.querySelectorAll("area").forEach(a => a.dataset.origCoords = a.coords);
-                resizeMap();
-                });
-                window.addEventListener("resize", resizeMap);
-            </script>
+                const dot = document.createElement("div");
+                dot.className = "dot";
+                imgContainer.appendChild(dot);
+
+                dotData.push({ area, origCoords, shape, cx, cy, dot });
+
+                area.addEventListener("mouseenter", () => dot.classList.add("active"));
+                area.addEventListener("mouseleave", () => dot.classList.remove("active"));
+            });
+        }
+
+        function updateDotPositions() {
+            if (!img.naturalWidth || !img.naturalHeight) return;
+
+            const scaleX = img.clientWidth / img.naturalWidth;
+            const scaleY = img.clientHeight / img.naturalHeight;
+
+            const offsetX = img.offsetLeft;
+            const offsetY = img.offsetTop;
+
+            dotData.forEach(item => {
+                const left = offsetX + item.cx * scaleX;
+                const top = offsetY + item.cy * scaleY;
+
+                item.dot.style.left = `${left}px`;
+                item.dot.style.top = `${top}px`;
+            });
+        }
+
+        function initDots() {
+            buildDotDataFromMap("image-map");
+            updateDotPositions();
+        }
+
+        window.addEventListener("load", () => {
+            // Store original coords FIRST
+            document.querySelectorAll("area").forEach(a => a.dataset.origCoords = a.coords);
+            resizeMap();
+            initDots();
+        });
+
+        window.addEventListener("resize", () => {
+            resizeMap();
+            updateDotPositions();
+        });
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/image-map-resizer@1.0.10/js/imageMapResizer.min.js"></script>
 </body>
 </html>

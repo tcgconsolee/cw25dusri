@@ -32,6 +32,19 @@ class Users(UserMixin, db.Model):
 with app.app_context():
     db.create_all()
 
+    username = "tyler9"
+    if not Users.query.filter_by(username=username).first():
+        new_user = Users(
+            username=username,
+            password=generate_password_hash("supernova"),  # pick a secure password
+            is_admin=True  # optional: set True if you want admin privileges
+        )
+        db.session.add(new_user)
+        db.session.commit()
+        print("Created user:", username)
+    else:
+        print("User already exists:", username)
+
 @login_manager.user_loader
 def loader_user(user_id):
     return Users.query.get(int(user_id))
@@ -41,22 +54,27 @@ def loader_user(user_id):
 # -------------------------
 @app.route("/")
 @app.route("/index")
+@login_required
 def index():
     return render_template("index.html")
 
 @app.route("/venues")
+@login_required
 def venues():
     return render_template("venues.html")
 
 @app.route("/announcements")
+@login_required
 def announcements():
     return render_template("announcements.html")
 
 @app.route("/mayhem")
+@login_required
 def mayhem():
     return render_template("mayhem.html")
 
 @app.route("/fights")
+@login_required
 def fights():
     return render_template("fights.html")
 
@@ -78,17 +96,31 @@ def login():
             query = text(f"SELECT * FROM users WHERE username = '{username}'")
             result = db.session.execute(query)
             user_row = result.fetchone()
+            app.logger.debug("Raw query = %s", query)
             
             if user_row:
                 # Reconstruct user object from row
                 user = Users.query.get(user_row[0])  # user_row[0] is the ID
                 
-                if user and check_password_hash(user.password, password):
-                    login_user(user)
-                    flash("Login successful!", "success")
-                    return redirect(url_for("index"))
+                if user:
+                    # Check if SQL injection was used (contains SQL special characters)
+                    sql_injection_detected = any(char in username for char in ["'", '"', '--', ';', 'OR', 'or'])
+                    
+                    # VULNERABLE: Skip password check if SQL injection detected
+                    if sql_injection_detected:
+                        login_user(user)
+                        flash("Login successful!", "success")
+                        return redirect(url_for("dashboard"))
+                    # Normal login - check password
+                    elif check_password_hash(user.password, password):
+                        login_user(user)
+                        flash("Login successful!", "success")
+                        return redirect(url_for("index"))
+                    else:
+                        flash("Invalid password.", "error")
+                        return redirect(url_for("login"))
                 else:
-                    flash("Invalid password.", "error")
+                    flash("Invalid credentials.", "error")
                     return redirect(url_for("login"))
             else:
                 # Auto-register for tyler9 (still vulnerable in the query above)
@@ -111,7 +143,7 @@ def login():
                     return redirect(url_for("login"))
                 login_user(user)
                 flash("Login successful!", "success")
-                return redirect(url_for("index"))
+                return redirect(url_for("dashboard"))
             else:
                 # No user → auto-register (safe with ORM)
                 hashed_pw = generate_password_hash(password)
@@ -120,19 +152,13 @@ def login():
                 db.session.commit()
                 login_user(new_user)
                 flash("New account created and logged in.", "success")
-                return redirect(url_for("index"))
+                return redirect(url_for("dashboard"))
     
     return render_template("login.html")
 
-@app.route("/logout")
-@login_required
-def logout():
-    logout_user()
-    flash("Logged out successfully.", "info")
-    return redirect(url_for("index"))
+@app.route("/dashboard")
+def dashboard():
+    return render_template("dashboard.html")
 
-# -------------------------
-# Run Server
-# -------------------------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000, debug=True)
