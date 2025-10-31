@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Dashboard</title>
 
-  <!-- Tailwind CDN (for the original classes) -->
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
@@ -18,7 +17,7 @@
         color: #fff;
         z-index: 100;
     }
-    /* Copied & adapted keyframes and helper classes from your React component */
+
     @keyframes scanline { 0% { background-position: 0 0; } 100% { background-position: 0 100%; } }
     @keyframes gridMove { 0% { transform: translate(0, 0); } 100% { transform: translate(40px, 40px); } }
     @keyframes lineMove { 0% { background-position: 0 0; } 100% { background-position: 100px 100px; } }
@@ -38,26 +37,20 @@
     .glow-border:hover { border: 1px solid rgba(255,255,255,0.4); box-shadow: 0 0 20px rgba(255,255,255,0.2); }
     .glitch-text:hover { animation: glitch 0.3s infinite; }
 
-    /* Particle container will be positioned absolute; small particle style */
     #particles .particle { position: absolute; border-radius: 9999px; opacity: .3; pointer-events: none; }
 
-    /* Mouse glow elements to be controlled by JS */
     .mouse-glow { position: fixed; pointer-events: none; border-radius: 9999px; transform: translate3d(0,0,0); z-index: 0; }
 
-    /* Make sure backdrop-blur class works for non-Tailwind setups with fallback */
     .backdrop-blur-sm { backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
 
-    /* minor layout niceties */
     body { background: #000; color: #fff; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Courier New", monospace; }
   </style>
 </head>
 <body class="min-h-screen bg-black text-white font-mono p-4 overflow-hidden relative">
 
-  <!-- Mouse-following glows -->
   <div id="mouseGlow1" class="mouse-glow w-96 h-96 blur-3xl opacity-20" style="background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 70%);"></div>
   <div id="mouseGlow2" class="mouse-glow w-64 h-64 blur-2xl opacity-10" style="background: radial-gradient(circle, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 70%);"></div>
 
-  <!-- Animated background effects (container for many effects) -->
   <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
     <div class="absolute inset-0 opacity-10"
          style="background-image: linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 40px 40px; animation: gridMove 20s linear infinite;"></div>
@@ -107,9 +100,8 @@
     <div class="absolute bottom-0 right-0 w-32 h-32 border-b-2 border-r-2 border-white opacity-20"></div>
   </div>
 
-  <!-- App content -->
   <div class="max-w-full mx-auto relative z-10" id="appRoot">
-    <!-- Header -->
+
     <div id="header" class="glow-border p-3 mb-3 glow-box backdrop-blur-sm bg-black/50">
       <div class="flex items-center justify-between mb-2">
         <div class="flex items-center gap-4">
@@ -121,7 +113,6 @@
       <div class="text-xs opacity-60">└──╼ RULE #1: You do not ask questions. RULE #2: Targets will be destroyed.</div>
     </div>
 
-    <!-- System Stats -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3" id="systemStats">
       <div class="glow-border p-3 glow-box backdrop-blur-sm bg-black/50">
         <div class="text-xs mb-1 opacity-60">[ SPACE_MONKEYS ]</div>
@@ -152,7 +143,6 @@
       </div>
     </div>
 
-    <!-- Input Terminal -->
     <div class="glow-border p-4 mb-3 glow-box backdrop-blur-sm bg-black/50">
       <div class="text-xs mb-3 opacity-60 flex items-center justify-between">
         <span>[ INITIATE_ATTACK ]</span>
@@ -171,12 +161,10 @@
       <div class="text-xs opacity-40 mt-2" id="cmdPreview">→ ./ddos --target &lt;domain&gt; --mode AGGRESSIVE --packets UNLIMITED</div>
     </div>
 
-    <!-- Main grid -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-3" id="mainGrid">
-      <!-- Active DDoS attack area (injected by JS) -->
+
       <div id="activeDdosContainer"></div>
 
-      <!-- Active Targets -->
       <div class="glow-border p-3 glow-box backdrop-blur-sm bg-black/50">
         <div class="text-xs mb-3 opacity-60 flex items-center justify-between">
           <span>[ ACTIVE_ATTACKS ]</span>
@@ -185,7 +173,6 @@
         <div class="space-y-2" id="targetsList"></div>
       </div>
 
-      <!-- Suggested Targets -->
       <div class="glow-border p-3 glow-box backdrop-blur-sm bg-black/50">
         <div class="text-xs mb-3 opacity-60">[ PRIORITY_OBJECTIVES ]</div>
         <div class="space-y-3">
@@ -218,7 +205,6 @@
       </div>
     </div>
 
-    <!-- Footer -->
     <div class="glow-border p-2 mt-3 text-xs opacity-50 flex items-center justify-between glow-box backdrop-blur-sm bg-black/50">
       <div>"The things you own end up owning you" - Tyler Durden | UPTIME: 7d 12h 34m</div>
       <div class="flex gap-4">
@@ -230,7 +216,7 @@
   </div>
 
   <script>
-    // ---- App state (vanilla) ----
+
     const state = {
       domain: '',
       activeDDoS: null,
@@ -251,7 +237,6 @@
       particles: []
     };
 
-    // ---- DOM refs ----
     const headerTimeEl = document.getElementById('headerTime');
     const cpuUsageText = document.getElementById('cpuUsageText');
     const cpuBar = document.getElementById('cpuBar');
@@ -272,18 +257,15 @@
     const mouseGlow1 = document.getElementById('mouseGlow1');
     const mouseGlow2 = document.getElementById('mouseGlow2');
 
-    // Utility: format date/time
     function formatTime(date) { return date.toTimeString().split(' ')[0]; }
     function formatDate(date) { return date.toISOString().split('T')[0]; }
 
-    // Build progress bar string like React version
     function buildBar(percent) {
       const filled = Math.floor(percent / 10);
       const empty = 10 - filled;
       return '[' + '█'.repeat(filled) + '░'.repeat(empty) + ']';
     }
 
-    // Render targets list
     function renderTargets() {
       targetsList.innerHTML = '';
       state.targets.forEach((t, idx) => {
@@ -306,7 +288,6 @@
       monkeysCount.textContent = `MONKEYS: ${state.memberCount}`;
     }
 
-    // Render active DDoS block if any
     function renderActiveDdos() {
       activeDdosContainer.innerHTML = '';
       if (!state.activeDDoS) return;
@@ -371,7 +352,6 @@
       `;
       activeDdosContainer.appendChild(el);
 
-      // bind abort btn
       document.getElementById('abortBtn').addEventListener('click', () => {
         state.activeDDoS = null;
         state.ddosStats = { bandwidth: 0, packets: 0, requests: 0, uptime: 100, responseTime: 0 };
@@ -380,7 +360,6 @@
       });
     }
 
-    // Add target logic (UI only)
     function addTargetFromInput() {
       const domain = domainInput.value.trim();
       if (!domain) return;
@@ -405,7 +384,6 @@
     destroyBtn.addEventListener('click', addTargetFromInput);
     domainInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') addTargetFromInput(); });
 
-    // keyboard shortcuts (space to initiate using current input, Esc to abort)
     window.addEventListener('keydown', (e) => {
       if (e.code === 'Space') { e.preventDefault(); addTargetFromInput(); }
       if (e.code === 'Escape') {
@@ -416,7 +394,6 @@
       }
     });
 
-    // Mouse move for glow
     window.addEventListener('mousemove', (e) => {
       state.mousePos = { x: e.clientX, y: e.clientY };
       const left1 = e.clientX - 192;
@@ -427,7 +404,6 @@
       mouseGlow2.style.top = (e.clientY - 128) + 'px';
     });
 
-    // Particle generation & animation
     function initParticles() {
       state.particles = Array.from({ length: 30 }, (_, i) => ({
         id: i,
@@ -438,7 +414,6 @@
         speedY: (Math.random() - 0.5) * 0.5
       }));
 
-      // create DOM nodes
       particlesContainer.innerHTML = '';
       state.particles.forEach(p => {
         const d = document.createElement('div');
@@ -459,7 +434,7 @@
           x: (p.x + p.speedX + 100) % 100,
           y: (p.y + p.speedY + 100) % 100
         }));
-        // update DOM
+
         state.particles.forEach(p => {
           const el = particlesContainer.querySelector('[data-id="'+p.id+'"]');
           if (el) {
@@ -470,7 +445,6 @@
       }, 50);
     }
 
-    // Stats update interval (every second)
     setInterval(() => {
       state.time = new Date();
       state.cpuUsage = Math.floor(Math.random() * 30) + 30;
@@ -487,7 +461,6 @@
         };
       }
 
-      // rerender relevant UI every second
       headerTimeEl.textContent = `${formatDate(state.time)} ${formatTime(state.time)}`;
       cpuUsageText.textContent = state.cpuUsage + '%';
       cpuBar.textContent = buildBar(state.cpuUsage);
@@ -500,21 +473,17 @@
       renderActiveDdos();
     }, 1000);
 
-    // Initial render
     renderTargets();
     renderActiveDdos();
     initParticles();
 
-    // Set an initial command preview update on input
     domainInput.addEventListener('input', () => {
       const d = domainInput.value.trim();
       cmdPreview.textContent = d ? `→ ./ddos --target ${d} --mode AGGRESSIVE --packets UNLIMITED` : '→ ./ddos --target <domain> --mode AGGRESSIVE --packets UNLIMITED';
     });
 
-    // seed header time immediate
     headerTimeEl.textContent = `${formatDate(state.time)} ${formatTime(state.time)}`;
 
-    // ---- End of app ----
   </script>
 </body>
 </html>
